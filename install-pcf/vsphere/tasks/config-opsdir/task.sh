@@ -103,48 +103,6 @@ network_configuration=$(
               "availability_zones": ($infra_availability_zones | split(","))
             }
           ]
-        },
-        {
-          "name": $deployment_network_name,
-          "service_network": false,
-          "subnets": [
-            {
-              "iaas_identifier": $deployment_vcenter_network,
-              "cidr": $deployment_network_cidr,
-              "reserved_ip_ranges": $deployment_reserved_ip_ranges,
-              "dns": $deployment_dns,
-              "gateway": $deployment_gateway,
-              "availability_zones": ($deployment_availability_zones | split(","))
-            }
-          ]
-        },
-        {
-          "name": $services_network_name,
-          "service_network": $services_network_is_service_network,
-          "subnets": [
-            {
-              "iaas_identifier": $services_vcenter_network,
-              "cidr": $services_network_cidr,
-              "reserved_ip_ranges": $services_reserved_ip_ranges,
-              "dns": $services_dns,
-              "gateway": $services_gateway,
-              "availability_zones": ($services_availability_zones | split(","))
-            }
-          ]
-        },
-        {
-          "name": $dynamic_services_network_name,
-          "service_network": true,
-          "subnets": [
-            {
-              "iaas_identifier": $dynamic_services_vcenter_network,
-              "cidr": $dynamic_services_network_cidr,
-              "reserved_ip_ranges": $dynamic_services_reserved_ip_ranges,
-              "dns": $dynamic_services_dns,
-              "gateway": $dynamic_services_gateway,
-              "availability_zones": ($dynamic_services_availability_zones | split(","))
-            }
-          ]
         }
       ]
     }'

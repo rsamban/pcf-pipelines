@@ -40,8 +40,9 @@ params:
   UAA_DATABASE_PORT:
   UAA_DATABASE_USERNAME:
   UAA_DATABASE_PASSWORD:
-inputs
-  - name pcf-pipelines
 
-run
-  path pcf-pipelines/tasks/cofigure-external-db/task.sh
+inputs:
+  - name: pcf-pipelines
+
+run:
+  path: pcf-pipelines/tasks/cofigure-external-db/task.sh

@@ -45,4 +45,4 @@ inputs:
   - name: pcf-pipelines
 
 run:
-  path: pcf-pipelines/tasks/cofigure-external-db/task.sh
+  path: pcf-pipelines/tasks/configure-external-db/task.sh

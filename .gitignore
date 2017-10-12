@@ -3,3 +3,5 @@ config
 *.iml
 .idea
 *.sw[po]
+**/creds*
+fly

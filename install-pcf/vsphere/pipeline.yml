@@ -1,15 +1,15 @@
+
 resource_types:
 - name: pivnet
   type: docker-image
   source:
     repository: pivotalcf/pivnet-resource
     tag: latest-final
-
 resources:
 - name: pcf-pipelines
   type: git
   source:
-    uri: git@github.com:pivotal-cf/pcf-pipelines.git
+    uri: git@github.com:rsamban/pcf-pipelines.git
     branch: master
     private_key: {{git_private_key}}
 
@@ -129,12 +129,6 @@ jobs:
       AZ_1: {{az_1_name}}
       AZ_1_CLUSTER_NAME: {{az_1_cluster_name}}
       AZ_1_RP_NAME: {{az_1_rp_name}}
-      AZ_2: {{az_2_name}}
-      AZ_2_CLUSTER_NAME: {{az_2_cluster_name}}
-      AZ_2_RP_NAME: {{az_2_rp_name}}
-      AZ_3: {{az_3_name}}
-      AZ_3_CLUSTER_NAME: {{az_3_cluster_name}}
-      AZ_3_RP_NAME: {{az_3_rp_name}}
       NTP_SERVERS: {{ntp_servers}}
       OPS_DIR_HOSTNAME: {{ops_dir_hostname}}
       ENABLE_VM_RESURRECTOR: {{enable_vm_resurrector}}
@@ -206,7 +200,7 @@ jobs:
       OPSMAN_PASSWORD: {{opsman_admin_password}}
       PRODUCT_NAME: cf
 
-- name: deploy-ert
+- name: configure-ert
   plan:
   - aggregate:
     - get: pcf-pipelines
@@ -214,10 +208,6 @@ jobs:
       params: {globs: []}
       passed: [stage-ert]
       trigger: true
-    - get: pivnet-product
-      resource: elastic-runtime
-      params: {globs: ["*.pivotal"]}
-      passed: [stage-ert]
 
   - task: configure
     file: pcf-pipelines/tasks/config-ert/task.yml
@@ -333,7 +323,42 @@ jobs:
       DIEGO_BRAIN_NSX_LB_SECURITY_GROUP: {{diego_brain_nsx_lb_security_group}}
       DIEGO_BRAIN_NSX_LB_PORT: {{diego_brain_nsx_lb_port}}
       HA_PROXY_LB_NAME: ""
-
+  - task: configure-external-db
+    file: pcf-pipelines/tasks/configure-external-db/task.yml
+    params:
+      OPSMAN_DOMAIN_OR_IP_ADDRESS: {{opsman_domain_or_ip_address}}
+      OPS_MGR_USR: {{opsman_admin_username}}
+      OPS_MGR_PWD: {{opsman_admin_password}}
+      SYSTEM_DATABASE: {{system_database}}
+      EXTERNAL_MYSQL_HOST: {{external_mysql_host}}
+      EXTERNAL_MYSQL_PORT: {{external_mysql_port}}
+      EXTERNAL_MYSQL_ACCOUNT_USERNAME: {{external_mysql_account_username}}
+      EXTERNAL_MYSQL_ACCOUNT_PASSWORD: {{external_mysql_account_password}}
+      EXTERNAL_MYSQL_APP_USAGE_SERVICE_USERNAME: {{external_mysql_app_usage_service_username}}
+      EXTERNAL_MYSQL_APP_USAGE_SERVICE_PASSWORD: {{external_mysql_app_usage_service_password}}
+      EXTERNAL_MYSQL_AUTOSCALE_USERNAME: {{external_mysql_autoscale_username}}
+      EXTERNAL_MYSQL_AUTOSCALE_PASSWORD: {{external_mysql_autoscale_password}}
+      EXTERNAL_MYSQL_CCDB_USERNAME: {{external_mysql_ccdb_username}}
+      EXTERNAL_MYSQL_CCDB_PASSWORD: {{external_mysql_ccdb_password}}
+      EXTERNAL_MYSQL_DIEGO_USERNAME: {{external_mysql_diego_username}}
+      EXTERNAL_MYSQL_DIEGO_PASSWORD: {{external_mysql_diego_password}}
+      EXTERNAL_MYSQL_LOCKET_USERNAME: {{external_mysql_locket_username}}
+      EXTERNAL_MYSQL_LOCKET_PASSWORD: {{external_mysql_locket_password}}
+      EXTERNAL_MYSQL_NETWORKPOLICYSERVER_USERNAME: {{external_mysql_networkpolicyserver_username}}
+      EXTERNAL_MYSQL_NETWORKPOLICYSERVER_PASSWORD: {{external_mysql_networkpolicyserver_password}}
+      EXTERNAL_MYSQL_NFSVOLUME_USERNAME: {{external_mysql_nfsvolume_username}}
+      EXTERNAL_MYSQL_NFSVOLUME_PASSWORD: {{external_mysql_nfsvolume_password}}
+      EXTERNAL_MYSQL_NOTIFICATIONS_USERNAME: {{external_mysql_notifications_username}}
+      EXTERNAL_MYSQL_NOTIFICATIONS_PASSWORD: {{external_mysql_notifications_password}}
+      EXTERNAL_MYSQL_ROUTING_USERNAME: {{external_mysql_routing_username}}
+      EXTERNAL_MYSQL_ROUTING_PASSWORD: {{external_mysql_routing_password}}
+      EXTERNAL_MYSQL_SILK_USERNAME: {{external_mysql_silk_username}}
+      EXTERNAL_MYSQL_SILK_PASSWORD: {{external_mysql_silk_password}}
+      UAA_DATABASE: {{uaa_database}}
+      UAA_DATABASE_HOST: {{uaa_database_host}}
+      UAA_DATABASE_PORT: {{uaa_database_port}}
+      UAA_DATABASE_USERNAME: {{uaa_database_username}}
+      UAA_DATABASE_PASSWORD: {{uaa_database_password}}
   - task: disable-errands
     file: pcf-pipelines/tasks/disable-errands/task.yml
     params:
@@ -342,7 +367,14 @@ jobs:
       OPSMAN_USERNAME: {{opsman_admin_username}}
       OPSMAN_PASSWORD: {{opsman_admin_password}}
       ERRANDS_TO_DISABLE: {{ert_errands_to_disable}}
-
+- name: deploy-ert
+  plan:
+  - aggregate:
+    - get: pcf-pipelines
+    - get: pcf-ops-manager
+      params: {globs: []}
+      passed: [configure-ert]
+      trigger: false
   - task: deploy
     file: pcf-pipelines/tasks/apply-changes/task.yml
     params:
